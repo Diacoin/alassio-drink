@@ -48,19 +48,44 @@
   var lb = document.querySelector(".lb");
   var lbImg = lb ? lb.querySelector("img") : null;
   var lbClose = lb ? lb.querySelector(".lb__close") : null;
+  var ZOOM = 2.6; /* fattore di ingrandimento rispetto alla dimensione adattata */
+  function lbResetImg() {
+    if (lbImg) { lbImg.style.width = ""; lbImg.style.height = ""; }
+  }
   function lbHide() {
     if (!lb) return;
     lb.classList.remove("open");
     lb.classList.remove("zoomed");
+    lbResetImg();
     lbImg.src = "";
     document.body.style.overflow = "";
+  }
+  function lbZoomOut() {
+    lb.classList.remove("zoomed");
+    lbResetImg();
+    lb.scrollTop = 0;
+    lb.scrollLeft = 0;
+  }
+  function lbZoomIn(e) {
+    var fitW = lbImg.clientWidth, fitH = lbImg.clientHeight;
+    var rect = lbImg.getBoundingClientRect();
+    var rx = rect.width ? (e.clientX - rect.left) / rect.width : 0.5;
+    var ry = rect.height ? (e.clientY - rect.top) / rect.height : 0.5;
+    lb.classList.add("zoomed");
+    lbImg.style.width = Math.round(fitW * ZOOM) + "px";
+    lbImg.style.height = Math.round(fitH * ZOOM) + "px";
+    requestAnimationFrame(function () {
+      lb.scrollLeft = rx * lbImg.offsetWidth - lb.clientWidth / 2;
+      lb.scrollTop = ry * lbImg.offsetHeight - lb.clientHeight / 2;
+    });
   }
   document.querySelectorAll("[data-lb]").forEach(function (fig) {
     fig.addEventListener("click", function () {
       var img = fig.querySelector("img");
       if (!img || !lb) return;
-      lbImg.src = img.currentSrc || img.src;
       lb.classList.remove("zoomed");
+      lbResetImg();
+      lbImg.src = img.currentSrc || img.src;
       lb.classList.add("open");
       document.body.style.overflow = "hidden";
     });
@@ -68,19 +93,8 @@
   if (lb) {
     lb.addEventListener("click", function (e) {
       if (e.target === lbImg) {
-        var nowZoomed = lb.classList.toggle("zoomed");
-        if (nowZoomed) {
-          var rect = lbImg.getBoundingClientRect();
-          var rx = (e.clientX - rect.left) / rect.width;
-          var ry = (e.clientY - rect.top) / rect.height;
-          requestAnimationFrame(function () {
-            lb.scrollLeft = rx * lbImg.offsetWidth - lb.clientWidth / 2;
-            lb.scrollTop = ry * lbImg.offsetHeight - lb.clientHeight / 2;
-          });
-        } else {
-          lb.scrollTop = 0;
-          lb.scrollLeft = 0;
-        }
+        if (lb.classList.contains("zoomed")) lbZoomOut();
+        else lbZoomIn(e);
       } else {
         lbHide();
       }
