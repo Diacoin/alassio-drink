@@ -282,3 +282,8 @@ p{color:var(--ink-soft)}
 .contact-form__status{margin-top:1rem;font-weight:600;min-height:1.2em;text-align:center}
 .contact-form__status.ok{color:#1a8a3a}
 .contact-form__status.err{color:#c2410c}
+
+/* ===== Contact photo (sticker) ===== */
+.contact-photo{width:min(55vw,200px);height:auto;display:block;margin:1.6rem auto .5rem;filter:drop-shadow(0 12px 22px rgba(20,18,16,.22))}
+.contact-photo__cap{font-weight:700;color:var(--ink);margin-bottom:.2rem}
+.contact-photo__cap span{color:var(--ink-soft);font-weight:500}
