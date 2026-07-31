@@ -44,27 +44,55 @@
     io.observe(el);
   });
 
-  /* lightbox galleria */
+  /* lightbox con zoom (galleria + rassegna stampa) */
   var lb = document.querySelector(".lb");
   var lbImg = lb ? lb.querySelector("img") : null;
+  var lbClose = lb ? lb.querySelector(".lb__close") : null;
+  function lbHide() {
+    if (!lb) return;
+    lb.classList.remove("open");
+    lb.classList.remove("zoomed");
+    lbImg.src = "";
+    document.body.style.overflow = "";
+  }
   document.querySelectorAll("[data-lb]").forEach(function (fig) {
     fig.addEventListener("click", function () {
       var img = fig.querySelector("img");
-      if (!img) return;
+      if (!img || !lb) return;
       lbImg.src = img.currentSrc || img.src;
+      lb.classList.remove("zoomed");
       lb.classList.add("open");
+      document.body.style.overflow = "hidden";
     });
   });
   if (lb) {
-    lb.addEventListener("click", function () {
-      lb.classList.remove("open");
-      lbImg.src = "";
-    });
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "Escape") {
-        lb.classList.remove("open");
-        lbImg.src = "";
+    lb.addEventListener("click", function (e) {
+      if (e.target === lbImg) {
+        var nowZoomed = lb.classList.toggle("zoomed");
+        if (nowZoomed) {
+          var rect = lbImg.getBoundingClientRect();
+          var rx = (e.clientX - rect.left) / rect.width;
+          var ry = (e.clientY - rect.top) / rect.height;
+          requestAnimationFrame(function () {
+            lb.scrollLeft = rx * lbImg.offsetWidth - lb.clientWidth / 2;
+            lb.scrollTop = ry * lbImg.offsetHeight - lb.clientHeight / 2;
+          });
+        } else {
+          lb.scrollTop = 0;
+          lb.scrollLeft = 0;
+        }
+      } else {
+        lbHide();
       }
+    });
+    if (lbClose) {
+      lbClose.addEventListener("click", function (e) {
+        e.stopPropagation();
+        lbHide();
+      });
+    }
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && lb.classList.contains("open")) lbHide();
     });
   }
 
